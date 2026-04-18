@@ -18,6 +18,8 @@
 ```python
 from fastapi import FastAPI
 
+from mcdreforged.api.types import PluginServerInterface
+
 app = FastAPI()
 
 
@@ -26,7 +28,7 @@ async def test():
     return "Hello, world!"
 
 
-def on_load(server, prev_module):
+def on_load(server: PluginServerInterface, prev_module):
     # mount if fastapi_mcdr is ready
     fastapi_mcdr = server.get_plugin_instance('fastapi_mcdr')
     if fastapi_mcdr is not None and fastapi_mcdr.is_ready():
@@ -39,7 +41,7 @@ def on_load(server, prev_module):
     )
 
 
-def on_unload(server):
+def on_unload(server: PluginServerInterface):
     # save plugin id and fastapi_mcdr instance
     id_ = server.get_self_metadata().id
     fastapi_mcdr = server.get_plugin_instance('fastapi_mcdr')
@@ -48,7 +50,7 @@ def on_unload(server):
     fastapi_mcdr.unmount(id_)
 
 
-def mount_app(server):
+def mount_app(server: PluginServerInterface):
     # save plugin id and fastapi_mcdr instance
     id_ = server.get_self_metadata().id
     fastapi_mcdr = server.get_plugin_instance('fastapi_mcdr')
