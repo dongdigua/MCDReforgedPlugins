@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import platform
+import subprocess
 from typing import List
 
 import psutil
@@ -71,6 +72,23 @@ def get_server_info(server: ServerInterface) -> RTextList:
             size += get_dir_size(i)
         return round_size(size)
 
+    def get_java_version():
+        try:
+            for pid in server.get_server_pid_all():
+                try:
+                    proc = psutil.Process(pid)
+                    if proc.name() in ('java', 'java.exe'):
+                        result = subprocess.run(
+                            [proc.exe(), '-version'],
+                            capture_output=True, text=True, timeout=10
+                        )
+                        return result.stderr.splitlines()[0].strip()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+        except Exception:
+            pass
+        return 'N/A'
+
     def format_line(
             translation_key: str,
             value: str,
@@ -89,6 +107,7 @@ def get_server_info(server: ServerInterface) -> RTextList:
         RText(' ============', color=RColor.gray), '\n',
         format_line('info.systemVersion', platform.platform()),
         format_line('info.pythonVersion', platform.python_version()),
+        format_line('info.javaVersion', get_java_version()),
         format_line('info.cpuBrand', get_cpu_brand()),
         format_line('info.cpuUsed', get_cpu_use()),
         format_line('info.memoryUsed', get_memory_use()),
